@@ -1,0 +1,34 @@
+.about-container-top {
+  outline: 2px solid white;
+  outline-offset: -1rem;
+}
+.about-container {
+  .show-name {
+    background-color: #f3f3f3;
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #000;
+      text-transform: uppercase;
+    }
+    p {
+      font-size: 1.2rem;
+      font-weight: 400;
+      color: #000;
+    }
+  }
+
+  .small-details {
+    h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #000;
+      text-transform: uppercase;
+    }
+    p {
+      font-size: 1rem;
+      font-weight: 400;
+      color: #000;
+    }
+  }
+}
