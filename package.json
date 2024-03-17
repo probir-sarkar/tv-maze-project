@@ -25,6 +25,7 @@
     "react-router-dom": "^6.22.3",
     "scss": "^0.2.4",
     "sort-by": "^1.2.0",
+    "swr": "^2.2.5",
     "zod": "^3.22.4"
   },
   "devDependencies": {
