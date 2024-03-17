@@ -35,12 +35,12 @@ function App() {
         </div>
       </div>
       {/* tab for all shows and bokked */}
-      <div className="">
-        <div className="tab">
-          <Link to="/" className="tablinks">
+      <div className="d-flex justify-content-center">
+        <div className="btn-group btn-group-toggle ">
+          <Link to="/" className={`btn btn-dark ${bookedTab ? "active" : ""}`}>
             All Shows
           </Link>
-          <Link to="/?booked=true" className="tablinks">
+          <Link to="/?booked=true" className={`btn btn-dark ${bookedTab ? "" : "active"}`}>
             Booked
           </Link>
         </div>
@@ -56,9 +56,15 @@ function App() {
         </div>
       </div>
       <div className="show-card-div">
-        {searchResults.map((show, index) => {
-          return <ShowCard key={show.id} show={show} index={index} />;
-        })}
+        <>
+          {searchResults.length === 0 ? (
+            <div className="text-center">
+              <h2>No shows found</h2>
+            </div>
+          ) : (
+            searchResults.map((show, index) => <ShowCard key={show.id} show={show} index={index} />)
+          )}
+        </>
       </div>
     </div>
   );
