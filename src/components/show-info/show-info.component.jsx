@@ -1,6 +1,9 @@
+import { useContext } from "react";
 import { Link } from "react-router-dom";
+import { TvMazeContext } from "../../contexts/tv-maze-api.context";
 
 const ShowInfo = ({ showDetails, handleProcessToBookTicket }) => {
+  const { isBooked } = useContext(TvMazeContext);
   return (
     <>
       <div className="col-md-6">
@@ -16,8 +19,7 @@ const ShowInfo = ({ showDetails, handleProcessToBookTicket }) => {
         <p>{showDetails.officialSite}</p>
         <h3>Schedule</h3>
         <p>
-          {showDetails.schedule.days.map((day) => day + " ")},{" "}
-          {showDetails.schedule.time}
+          {showDetails.schedule.days.map((day) => day + " ")}, {showDetails.schedule.time}
         </p>
 
         <h3>Avarage Runtime</h3>
@@ -31,7 +33,7 @@ const ShowInfo = ({ showDetails, handleProcessToBookTicket }) => {
         </div>
         <div className="col-md-8 mt-4">
           <button className="show-btn dark" onClick={handleProcessToBookTicket}>
-            Process to Book Ticket
+            {isBooked(showDetails.id) ? "View Ticket" : "Process to Book Ticket"}
           </button>
         </div>
       </div>
