@@ -1,22 +1,25 @@
-import { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { TvMazeContext } from "../../contexts/tv-maze-api.context";
 import ShowInfo from "../show-info/show-info.component";
 import BookTicket from "../book-ticket/book-ticket.component";
 import "./about-show.styles.scss";
+import { useQuery } from "@tanstack/react-query";
+import TvMazeApi from "../../api/tv-maze.api";
+
+
 
 const AboutShow = () => {
   const { id } = useParams();
   const { shows, isBooked } = useContext(TvMazeContext);
-  const [showDetails, setShowDetails] = useState({});
   const [searchParams, setSearchParams] = useSearchParams();
   const bookingFormOpen = searchParams.get("booking") === "true";
-  useEffect(() => {
-    const findShow = shows.find((show) => show.id === parseInt(id));
-    if (findShow) {
-      setShowDetails(findShow);
-    }
-  }, [id, shows]);
+
+  const {data: showDetails} = useQuery({
+    queryKey: ["showDetails", id],
+    queryFn: () => TvMazeApi.getShowDetails(id),
+    enabled: !!id,
+  });
 
   const handleProcessToBookTicket = () => {
     setSearchParams({ booking: "true" });

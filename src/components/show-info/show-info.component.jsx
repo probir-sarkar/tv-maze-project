@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import React,{ useContext } from "react";
 import { Link } from "react-router-dom";
 import { TvMazeContext } from "../../contexts/tv-maze-api.context";
 
