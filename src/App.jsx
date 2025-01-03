@@ -10,6 +10,8 @@ import { Link } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import TvMazeApi from "./api/tv-maze.api";
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 
 function App() {
   const { shows, bookedTickets } = useContext(TvMazeContext);

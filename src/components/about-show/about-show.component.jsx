@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router";
 import { TvMazeContext } from "../../contexts/tv-maze-api.context";
 import ShowInfo from "../show-info/show-info.component";
 import BookTicket from "../book-ticket/book-ticket.component";

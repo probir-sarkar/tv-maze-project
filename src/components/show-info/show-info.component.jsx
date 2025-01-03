@@ -1,5 +1,5 @@
 import React,{ useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { TvMazeContext } from "../../contexts/tv-maze-api.context";
 
 const ShowInfo = ({ showDetails, handleProcessToBookTicket }) => {

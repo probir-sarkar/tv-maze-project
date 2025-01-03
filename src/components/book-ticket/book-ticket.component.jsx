@@ -2,7 +2,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ErrorMessage from "../error-message/error-message.component";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router";
 import { useEffect, useState } from "react";
 import "./book-ticket.styles.scss";
 import ShowTicket from "../show-ticket/show-ticket.component";
