@@ -18,8 +18,11 @@ export const TvMazeProvider = ({ children }) => {
   const isBooked = (showId) => {
     return bookedTickets.find((ticket) => ticket.id === showId);
   };
+  const deleteTicket = (showId) => {
+    setBookedTickets(bookedTickets.filter((ticket) => ticket.id !== showId));
+  };
 
-  const value = { shows, bookedTickets, setBookedTickets, isBooked };
+  const value = { shows, bookedTickets, setBookedTickets, isBooked,deleteTicket };
 
   // return the provider
   return <TvMazeContext.Provider value={value}>{children}</TvMazeContext.Provider>;

@@ -10,20 +10,17 @@ import { Link } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import TvMazeApi from "./api/tv-maze.api";
-import 'bootstrap/dist/css/bootstrap.min.css';
-
+import "bootstrap/dist/css/bootstrap.min.css";
 
 function App() {
   const { shows, bookedTickets } = useContext(TvMazeContext);
   // const [searchResults, setSearchResults] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
 
-const searchTerm = searchParams.get("search") || "";
+  const searchTerm = searchParams.get("search") || "";
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   const bookedTab = searchParams.get("booked");
-
-  
 
   const handleSearchChange = (event) => {
     setSearchParams({ search: event.target.value });
@@ -33,10 +30,10 @@ const searchTerm = searchParams.get("search") || "";
     queryKey: ["shows", debouncedSearchTerm],
     queryFn: debouncedSearchTerm ? () => TvMazeApi.searchShows(debouncedSearchTerm) : () => TvMazeApi.getAllShows(),
     staleTime: 5000,
-    cacheTime: 5000,
+    cacheTime: 5000
   });
 
-  const searchResults = data || [];
+  const searchResults = bookedTab ? bookedTickets : data || [];
 
   return (
     <div className="App">

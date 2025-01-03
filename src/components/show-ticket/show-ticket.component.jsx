@@ -1,19 +1,50 @@
+import React from "react";
 import { useSearchParams } from "react-router";
 
 import "./show-ticket.styles.scss";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrashArrowUp } from "@fortawesome/free-solid-svg-icons";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import Tooltip from "react-bootstrap/Tooltip";
+import { useContext } from "react";
+import { TvMazeContext } from "@/contexts/tv-maze-api.context";
 
 const ShowTicket = ({ ticket }) => {
-  const { showId, showName, ticketDetails } = ticket;
+  const { id, showName, ticketDetails } = ticket;
   const { name, email, phone, date, time, seats } = ticketDetails;
+  const { deleteTicket } = useContext(TvMazeContext);
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const handleBackToDetails = () => {
+    setSearchParams({});
+  };
+  const handleEditTicket = () => {
+    setSearchParams({ booking: "true", edit: "true" });
+  };
+
+  const handleDeleteTicket = () => {
+    deleteTicket(id);
+    handleBackToDetails();
+  };
 
   return (
     <>
       <div className="ticket-container">
-        <div className="show-info mb-4 border-bottom">
-          <div className="badge badge-dark bg-dark">Show ID: {showId}</div>
-          <h2 className="fw-bolder my-1"> {showName}</h2>
-          <p className="display-1">Show this ticket at the entrance</p>
+        <div className="header border-bottom mb-4 ">
+          <div className="show-info ">
+            <div className="badge badge-dark bg-dark">Show ID: {id}</div>
+            <h2 className="fw-bolder my-1"> {showName}</h2>
+            <p className="display-1">Show this ticket at the entrance</p>
+          </div>
+          <div className="delete-btn">
+            <OverlayTrigger
+              placement="top"
+              delay={{ show: 250, hide: 400 }}
+              overlay={<Tooltip className="button-tooltip">Delete Ticket</Tooltip>}
+            >
+              <FontAwesomeIcon className="delete-icon" onClick={handleDeleteTicket} icon={faTrashArrowUp} />
+            </OverlayTrigger>
+          </div>
         </div>
 
         <div className="row">
@@ -46,12 +77,12 @@ const ShowTicket = ({ ticket }) => {
       </div>
       <div className="row w-100 mobile-screen-btn p-0 m-0">
         <div className="col-md-4 mt-4">
-          <button type="button" onClick={() => setSearchParams({})} className="show-btn">
+          <button type="button" onClick={handleBackToDetails} className="show-btn">
             Back to Details
           </button>
         </div>
         <div className="col-md-8 mt-4">
-          <button onClick={() => setSearchParams({ booking: "true", edit: "true" })} className="show-btn dark">
+          <button onClick={handleEditTicket} className="show-btn dark">
             Edit Ticket
           </button>
         </div>
