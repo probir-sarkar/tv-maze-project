@@ -1,29 +1,40 @@
 // import useState, useEffect, useContext, and TvMazeContext
 import React, { useContext, useEffect, useState } from "react";
 import { TvMazeContext } from "./contexts/tv-maze-api.context";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router";
 
 import ShowCard from "./components/show-card/show-card.component";
 
 import "./App.scss";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useDebounce } from "@uidotdev/usehooks";
+import TvMazeApi from "./api/tv-maze.api";
 
 function App() {
   const { shows, bookedTickets } = useContext(TvMazeContext);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
+  // const [searchResults, setSearchResults] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
+
+const searchTerm = searchParams.get("search") || "";
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   const bookedTab = searchParams.get("booked");
 
+  
+
   const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
+    setSearchParams({ search: event.target.value });
   };
-  useEffect(() => {
-    const allShows = bookedTab ? bookedTickets : shows;
-    const results = allShows.filter((show) => show.name.toLowerCase().includes(searchTerm.toLowerCase()));
-    setSearchResults(results);
-  }, [searchTerm, shows, bookedTab]);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["shows", debouncedSearchTerm],
+    queryFn: debouncedSearchTerm ? () => TvMazeApi.searchShows(debouncedSearchTerm) : () => TvMazeApi.getAllShows(),
+    staleTime: 5000,
+    cacheTime: 5000,
+  });
+
+  const searchResults = data || [];
 
   return (
     <div className="App">
@@ -59,7 +70,7 @@ function App() {
         <>
           {searchResults.length === 0 ? (
             <div className="text-center">
-              <h2>No shows found</h2>
+              <h2>{isLoading ? "Loading..." : "No Shows Found"}</h2>
             </div>
           ) : (
             searchResults.map((show, index) => <ShowCard key={show.id} show={show} index={index} />)
