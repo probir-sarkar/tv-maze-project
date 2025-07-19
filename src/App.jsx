@@ -102,7 +102,7 @@ function App() {
         <div className="input-box">
           <input
             type="text"
-            placeholder="Search For Movie..."
+            placeholder="Search For a Show..."
             value={searchTerm}
             onChange={handleSearchChange}
           />
