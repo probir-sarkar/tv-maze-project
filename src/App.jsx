@@ -1,80 +1,133 @@
-// import useState, useEffect, useContext, and TvMazeContext
-import React, { useContext, useEffect, useState } from "react";
-import { TvMazeContext } from "./contexts/tv-maze-api.context";
+import React, { useContext, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router";
+import { Link } from "react-router";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useIntersectionObserver, useDebounce } from "@uidotdev/usehooks";
 
+import { TvMazeContext } from "./contexts/tv-maze-api.context";
+import TvMazeApi from "./api/tv-maze.api";
 import ShowCard from "./components/show-card/show-card.component";
 
-import "./App.scss";
-import { Link } from "react-router";
-import { useQuery } from "@tanstack/react-query";
-import { useDebounce } from "@uidotdev/usehooks";
-import TvMazeApi from "./api/tv-maze.api";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "./App.scss";
 
 function App() {
-  const { shows, bookedTickets } = useContext(TvMazeContext);
-  // const [searchResults, setSearchResults] = useState([]);
+  const { bookedTickets } = useContext(TvMazeContext);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const searchTerm = searchParams.get("search") || "";
-  const debouncedSearchTerm = useDebounce(searchTerm, 500);
-
   const bookedTab = searchParams.get("booked");
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   const handleSearchChange = (event) => {
     setSearchParams({ search: event.target.value });
   };
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["shows", debouncedSearchTerm],
-    queryFn: debouncedSearchTerm ? () => TvMazeApi.searchShows(debouncedSearchTerm) : () => TvMazeApi.getAllShows(),
-    staleTime: 5000,
-    cacheTime: 5000
+  // Infinite shows query
+  const {
+    data: infinitePages,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["shows"],
+    queryFn: ({ pageParam = 0 }) => TvMazeApi.getAllShows({ pageParam }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.data.length ? allPages.length : undefined,
+    refetchOnWindowFocus: false,
   });
 
-  const searchResults = bookedTab ? bookedTickets : data || [];
+  // Search query
+  const { data: searchResults = [] } = useQuery({
+    queryKey: ["search", debouncedSearchTerm],
+    queryFn: () => TvMazeApi.searchShows(debouncedSearchTerm),
+    enabled: !!debouncedSearchTerm,
+  });
+
+  // Intersection observer for infinite scroll
+  const [ref, entry] = useIntersectionObserver({
+    threshold: 0,
+    rootMargin: "0px",
+  });
+
+  // Trigger fetchNextPage on intersection
+  useEffect(() => {
+    if (entry?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [entry, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // Flatten infinite query results
+  const infiniteData = useMemo(
+    () => infinitePages?.pages.flatMap((page) => page.data) ?? [],
+    [infinitePages]
+  );
+
+  // Final shows to render based on tab & search
+  const showsToRender = useMemo(() => {
+    if (bookedTab) return bookedTickets;
+    if (searchTerm) return searchResults;
+    return infiniteData;
+  }, [bookedTab, bookedTickets, searchTerm, searchResults, infiniteData]);
 
   return (
     <div className="App">
-      <div className="container-fluid main-hero">
+      <header className="container-fluid main-hero">
         <div className="row">
           <div className="col-md-12 hero-text">
             <h1 className="text-center">TV SHOWS</h1>
           </div>
         </div>
-      </div>
-      {/* tab for all shows and bokked */}
-      <div className="d-flex justify-content-center">
-        <div className="btn-group btn-group-toggle ">
-          <Link to="/" className={`btn btn-dark ${bookedTab ? "active" : ""}`}>
+      </header>
+
+      {/* Tab navigation */}
+      <div className="d-flex justify-content-center mb-3">
+        <div className="btn-group btn-group-toggle">
+          <Link to="/" className={`btn btn-dark ${!bookedTab ? "active" : ""}`}>
             All Shows
           </Link>
-          <Link to="/?booked=true" className={`btn btn-dark ${bookedTab ? "" : "active"}`}>
+          <Link
+            to="/?booked=true"
+            className={`btn btn-dark ${bookedTab ? "active" : ""}`}
+          >
             Booked
           </Link>
         </div>
       </div>
-      <div className="search-filter">
+
+      {/* Search box */}
+      <div className="search-filter mb-3">
         <div className="input-box">
           <input
             type="text"
-            placeholder="Search For Movie...."
+            placeholder="Search For Movie..."
             value={searchTerm}
-            onChange={(event) => handleSearchChange(event)}
+            onChange={handleSearchChange}
           />
         </div>
       </div>
+
+      {/* Show cards */}
       <div className="show-card-div">
-        <>
-          {searchResults.length === 0 ? (
-            <div className="text-center">
-              <h2>{isLoading ? "Loading..." : "No Shows Found"}</h2>
-            </div>
-          ) : (
-            searchResults.map((show, index) => <ShowCard key={show.id} show={show} index={index} />)
-          )}
-        </>
+        {showsToRender.length === 0 ? (
+          <div className="text-center">
+            <h2>{isLoading ? "Loading..." : "No Shows Found"}</h2>
+          </div>
+        ) : (
+          <>
+            {showsToRender.map((show, index) => (
+              <ShowCard key={show.id} show={show} index={index} />
+            ))}
+            {!searchTerm && !bookedTab && (
+              <div ref={ref} className="text-center my-3">
+                {isFetchingNextPage && <p>Loading more shows...</p>}
+                {!hasNextPage && <p>All shows loaded.</p>}
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
